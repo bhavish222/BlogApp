@@ -22,7 +22,7 @@ public class User {
     @Column(name = "enabled")
     private boolean enabled = true;
 
-    @OneToMany(cascade=CascadeType.ALL, mappedBy = "user")
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
     private List<Post> posts;
 
 

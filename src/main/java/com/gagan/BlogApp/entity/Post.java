@@ -18,8 +18,9 @@ public class Post {
     @Column(name="content")
     private String content;
 
-    @ManyToOne()
-    @Column(name="author_id")
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE,
+            CascadeType.DETACH, CascadeType.REFRESH})
+    @JoinColumn(name="author_id")
     private User author;
 
     @Column(name="published_at")
