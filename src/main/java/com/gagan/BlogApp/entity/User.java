@@ -1,8 +1,6 @@
 package com.gagan.BlogApp.entity;
 
 import jakarta.persistence.*;
-import org.antlr.v4.runtime.misc.NotNull;
-
 import java.util.List;
 
 @Entity
@@ -13,18 +11,30 @@ public class User {
     @Column(name = "id")
     private Integer id;
 
-    @Column(name = "username")
-    private String username;
+    @Column(name = "name")
+    private String name;
+    @Column(name = "email")
+    private String email;
 
     @Column(name = "password")
     private String password;
 
-    @Column(name = "enabled")
-    private boolean enabled = true;
-
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
     private List<Post> posts;
 
+    public User() {}
 
+    public User(String name, String email,String password) {
+        this.name = name;
+        this.password = password;
+        this.email=email;
+    }
 
+    public User(Integer id, String name,String email, String password) {
+        this.id = id;
+        this.name = name;
+        this.password = password;
+        this.email=email;
+
+    }
 }
