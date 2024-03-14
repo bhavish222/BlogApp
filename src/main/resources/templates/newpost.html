@@ -27,7 +27,7 @@
     <input type="text" id="title" th:field="*{title}"/>
 
     <label for="tags">Tags</label><br>
-    <input id="tags" type="text"  name="tagString" /><br>
+    <input id="tags" type="text"  th:field="*{tags}" /><br>
 
     <label for="content">Content</label><br>
     <!-- Use th:field to bind content field to the 'content' property of the Post object -->
