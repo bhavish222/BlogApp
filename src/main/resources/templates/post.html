@@ -7,6 +7,7 @@
             margin: 0;
             font-family: Arial, sans-serif;
         }
+
         header {
             background-color: #f0f0f0;
             padding: 20px;
@@ -15,10 +16,12 @@
             align-items: center;
             flex-direction: column;
         }
+
         h1 {
             margin: 0;
             font-size: 2em;
         }
+
         .center-justified {
             text-align: justify;
             padding: 1rem; /* Adjust padding as needed */
@@ -26,13 +29,31 @@
             width: fit-content; /* Ensures content width fits its natural size */
         }
 
+        .bottom-left {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+        }
 
-    </style> </head>
+        .bottom-left button {
+            margin-right: 10px;
+        }
+    </style>
+</head>
 <body>
 <header>
-    <h1><span th:text="${post.title}">Blog post title</span></h1><br><br>
-    <p th:text="${post.author}">By Ashok Kumar, 18/08/2020</p>
+    <h1><span th:text="${post.title}"></span></h1><br><br>
+    <p th:text="${post.author}"></p>
 </header>
-<p class="center-justified" th:text="${post.content}">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc maximus, nulla ut commodo sagittis, sapien dui mattis dui, non pulvinar lorem felis nec erat. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc maximus, nulla ut commodo sagittis, sapien dui mattis dui, non pulvinar lorem felis nec erat</p>
+<p class="center-justified" th:text="${post.content}"></p>
+<div class="bottom-left">
+    <a th:href="@{'/blog/update/'+${post.id}}">
+        <button>Update</button>
+    </a>
+    <a th:href="@{'/blog/delete/'+${post.id}}">
+        <button>Delete</button>
+    </a>
+</div>
 </body>
 </html>
+

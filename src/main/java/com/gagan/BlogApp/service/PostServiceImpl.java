@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class PostServiceImpl implements PostService{
+public class PostServiceImpl implements PostService {
     private PostRepository postRepository;
 
     @Autowired
@@ -22,6 +22,7 @@ public class PostServiceImpl implements PostService{
         postRepository.save(post);
 
     }
+
     @Override
     public List<Post> findAll() {
         return postRepository.findAll();
@@ -34,8 +35,7 @@ public class PostServiceImpl implements PostService{
 
         if (result.isPresent()) {
             post = result.get();
-        }
-        else {
+        } else {
             // we didn't find the employee
             throw new RuntimeException("Did not find employee id - " + id);
         }

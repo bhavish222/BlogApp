@@ -16,6 +16,7 @@ import java.util.List;
 public class PostController {
 
     private PostService postService;
+
     @Autowired
     public PostController(PostService thePostService) {
         postService = thePostService;
@@ -23,12 +24,8 @@ public class PostController {
 
     @GetMapping("/newpost")
     public String newPost(Model theModel) {
-
-        // create model attribute to bind form data
         Post post = new Post();
-
         theModel.addAttribute("Post", post);
-
         return "newpost";
     }
 
@@ -42,12 +39,22 @@ public class PostController {
         post.setCreatedAt(new Timestamp(System.currentTimeMillis()));
         post.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
 
-        User user = new User(1,"Gagan","gagan@gmail.com", "1234");
-        model.addAttribute("user" , user);
+        User user = new User(1, "Gagan", "gagan@gmail.com", "1234");
+        model.addAttribute("user", user);
         post.setAuthor(user);
-        postService.save(post);
 
-        return "/blog/allPosts";
+        // Check if the post already exists in the database
+        Post existingPost = postService.findById(post.getId());
+        if (existingPost != null) {
+            // If it exists, update the existing post
+            post.setCreatedAt(existingPost.getCreatedAt());
+            postService.save(post);
+        } else {
+            // If it doesn't exist, save it as a new post
+            postService.save(post);
+        }
+
+        return "redirect:/blog/allposts";
     }
 
     @GetMapping("/allposts")
@@ -61,16 +68,28 @@ public class PostController {
 
         return "allPosts";
     }
+
     @GetMapping("/post/{postId}")
     public String post(@PathVariable("postId") int postId, Model theModel) {
+        Post post = postService.findById(postId);
+        theModel.addAttribute("post", post);
+        return "post";
+    }
+
+    @GetMapping("/update/{postId}")
+    public String update(@PathVariable("postId") int postId, Model theModel) {
         // Use the postService to find the post by its ID
         Post post = postService.findById(postId);
+        theModel.addAttribute("Post", post);
+        return "newpost";
+    }
 
-        // Add the fetched post to the model
-        theModel.addAttribute("post", post);
-
-        // Return the name of the Thymeleaf template to display the post
-        return "post";
+    @GetMapping("/delete/{postId}")
+    public String delete(@PathVariable("postId") int postId, Model theModel) {
+        // Use the postService to find the post by its ID
+        Post post = postService.findById(postId);
+        theModel.addAttribute("Post", post);
+        return "newpost";
     }
 
 
