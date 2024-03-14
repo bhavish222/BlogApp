@@ -31,26 +31,24 @@ public class PostController {
 
     @PostMapping("/savepost")
     public String savePost(@ModelAttribute("Post") Post post, Model model) {
-        String content = post.getContent();
-        String excerpt = content.length() > 30 ? content.substring(0, 30) : content;
-        post.setExcerpt(excerpt);
-        post.setIsPublished(true);
-        post.setPublishedAt(new Timestamp(System.currentTimeMillis()));
-        post.setCreatedAt(new Timestamp(System.currentTimeMillis()));
-        post.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+        if(post.getId()==0)
+        {
+            String content = post.getContent();
+            String excerpt = content.length() > 30 ? content.substring(0, 30) : content;
+            post.setExcerpt(excerpt);
+            post.setIsPublished(true);
+            post.setPublishedAt(new Timestamp(System.currentTimeMillis()));
+            post.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+            post.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
 
-        User user = new User(1, "Gagan", "gagan@gmail.com", "1234");
-        model.addAttribute("user", user);
-        post.setAuthor(user);
-
-        // Check if the post already exists in the database
-        Post existingPost = postService.findById(post.getId());
-        if (existingPost != null) {
-            // If it exists, update the existing post
-            post.setCreatedAt(existingPost.getCreatedAt());
+            User user = new User(1, "Gagan", "gagan@gmail.com", "1234");
+            model.addAttribute("user", user);
+            post.setAuthor(user);
             postService.save(post);
-        } else {
-            // If it doesn't exist, save it as a new post
+        }
+        else{
+            Post existingPost = postService.findById(post.getId());
+            post.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
             postService.save(post);
         }
 
@@ -85,11 +83,15 @@ public class PostController {
     }
 
     @GetMapping("/delete/{postId}")
-    public String delete(@PathVariable("postId") int postId, Model theModel) {
-        // Use the postService to find the post by its ID
-        Post post = postService.findById(postId);
-        theModel.addAttribute("Post", post);
-        return "newpost";
+    public String delete(@PathVariable("postId") int theId) {
+
+
+        // delete the employee
+        postService.deleteById(theId);
+
+        // redirect to /employees/list
+        return "redirect:/blog/allposts";
+
     }
 
 

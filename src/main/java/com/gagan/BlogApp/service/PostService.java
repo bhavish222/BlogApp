@@ -10,5 +10,6 @@ public interface PostService {
     List<Post> findAll();
 
     Post findById(int id);
+    void deleteById(int id);
 
 }

@@ -9,36 +9,31 @@
             margin: auto;
             margin-top: 50px;
         }
-
         label, input, textarea, h1 {
             width: 100%;
             margin: 10px;
         }
-
         h1 {
             text-align: center;
         }
     </style>
 </head>
 <body>
-
 <form method="POST" th:action="@{/blog/savepost}" th:object="${Post}">
     <h1>Create new BlogPost</h1>
+
     <input th:field="*{id}" type="hidden"/>
     <label for="title">Title</label><br>
-    <!-- Use th:field to bind title field to the 'title' property of the Post object -->
+
     <input id="title" th:field="*{title}" type="text"/>
 
-    <!--    <label for="tags">Tags</label><br>-->
-    <!--    <input id="tags" type="text"  th:field="*{tags}" /><br>-->
+    <label for="tags">Tags</label><br>
+    <input id="tags" type="text"  th:field="*{tags}" /><br>
 
     <label for="content">Content</label><br>
-    <!-- Use th:field to bind content field to the 'content' property of the Post object -->
     <textarea id="content" rows="6" th:field="*{content}"></textarea>
 
     <input type="submit" value="Publish">
 </form>
-
-
 </body>
 </html>
