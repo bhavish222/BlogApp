@@ -30,13 +30,33 @@
         }
 
         .bottom-left {
-            position: absolute;
+            /*position: absolute;*/
             bottom: 10px;
             left: 10px;
+            text-align: center;
         }
 
         .bottom-left button {
             margin-right: 10px;
+        }
+        .div-1{
+            margin: 20px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            border: 1px solid black;
+        }
+        .div-1 > p{
+            padding-right: 20px;
+        }
+        .div-1 > a {
+            padding-right: 20px;
+        }
+        .bottom-left > a > button{
+            font-size: 20px;
+        }
+        .comment-heading {
+            padding: 20px;
         }
     </style>
 </head>
@@ -53,6 +73,51 @@
     <a th:href="@{'/blog/delete/'+${post.id}}">
         <button>Delete</button>
     </a>
+</div>
+
+<!-- Comment Section -->
+<div id="comment-section">
+    <h2 class="comment-heading">Comments</h2>
+    <!-- Existing comments -->
+    <div th:each="comment : ${post.getComments()}" class="div-1">
+        <p th:text="${comment.commentText}"></p>
+        <a th:href="@{'/updateComment/' + ${comment.id}}">
+            <button>Update</button>
+        </a>
+        <a th:href="@{'/deleteComment/' + ${comment.id}}">
+            <button>Delete</button>
+        </a>
+    </div>
+</div>
+
+
+<!--&lt;!&ndash; Comment Section &ndash;&gt;-->
+<!--<div id="comment-section">-->
+<!--    <h2>Comments</h2>-->
+<!--    &lt;!&ndash; Existing comments &ndash;&gt;-->
+<!--    <div th:each="comment : ${post.getComments()}">-->
+<!--        <p th:text="${comment.commentText}"></p>-->
+<!--    </div>-->
+
+<!-- Form to add new comment -->
+<h4>Add new Comment</h4>
+<form th:action="@{/addComment/{postId}(postId=${post.id})}" th:object="${Comment}" method="POST">
+
+    <label for="id">Name: </label>
+    <input id="id" type="hidden" th:field="*{id}"/>
+
+    <label for="name">Name: </label>
+    <input id="name" type="text" th:field="*{name}"/>
+
+    <label for="email">Email: </label>
+    <input id="email" type="text" th:field="*{email}"/>
+
+    <label for="comment">Comment: </label>
+    <input id="comment" type="text" th:field="*{commentText}"/>
+
+    <input type="submit" value="Submit">
+
+</form>
 </div>
 </body>
 </html>

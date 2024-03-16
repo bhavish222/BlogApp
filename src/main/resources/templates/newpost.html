@@ -9,16 +9,19 @@
             margin: auto;
             margin-top: 50px;
         }
+
         label, input, textarea, h1 {
             width: 100%;
             margin: 10px;
         }
+
         h1 {
             text-align: center;
         }
     </style>
 </head>
 <body>
+
 <form method="POST" th:action="@{/blog/savepost}" th:object="${Post}">
     <h1>Create new BlogPost</h1>
 
@@ -28,12 +31,14 @@
     <input id="title" th:field="*{title}" type="text"/>
 
     <label for="tags">Tags</label><br>
-    <input id="tags" type="text"  th:field="*{tags}" /><br>
+    <input id="tags" type="text" name="tagString" th:value="${tagString}"/><br>
 
     <label for="content">Content</label><br>
     <textarea id="content" rows="6" th:field="*{content}"></textarea>
 
     <input type="submit" value="Publish">
 </form>
+
+
 </body>
 </html>

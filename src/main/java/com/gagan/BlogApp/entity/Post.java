@@ -3,40 +3,52 @@ package com.gagan.BlogApp.entity;
 import jakarta.persistence.*;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name="Posts")
+@Table(name = "Posts")
 public class Post {
     @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
-    @Column(name="id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private int id;
 
-    @Column(name="title")
+    @Column(name = "title")
     private String title;
-    @Column(name="excerpt")
+    @Column(name = "excerpt")
     private String excerpt;
 
-    @Column(name="content")
+    @Column(name = "content")
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE,
-            CascadeType.DETACH,CascadeType.REFRESH})
-    @JoinColumn(name="author_id")
+            CascadeType.DETACH, CascadeType.REFRESH})
+    @JoinColumn(name = "author_id")
     private User author;
 
-    @Column(name="published_at")
+    @Column(name = "published_at")
     private Timestamp publishedAt;
 
-    @Column(name="is_published")
+    @Column(name = "is_published")
     private boolean isPublished;
 
-    @Column(name="created_at", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "created_at", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private Timestamp createdAt;
 
-    @Column(name="updated_at", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "updated_at", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private Timestamp updatedAt;
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
+    private List<Comment> comments;
+
+    public List<Comment> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<Comment> comments) {
+        this.comments = comments;
+    }
 
     @ManyToMany(fetch = FetchType.LAZY,
             cascade = {CascadeType.PERSIST, CascadeType.MERGE,
@@ -48,15 +60,8 @@ public class Post {
     )
     private List<Tag> tags;
 
-    public List<Tag> getTags() {
-        return tags;
+    public Post() {
     }
-
-    public void setTags(List<Tag> tags) {
-        this.tags = tags;
-    }
-
-    public Post() {}
 
     public Post(String title, String content, User author) {
         this.title = title;
@@ -136,11 +141,21 @@ public class Post {
         this.updatedAt = updatedAt;
     }
 
+    public List<Tag> getTags() {
+        return tags;
+    }
 
+    public void setTags(List<Tag> tags) {
+        this.tags = tags;
+    }
 
-
-
-
+    //covienece method to add tags
+    public void addtag(Tag tag) {
+        if (tags == null) {
+            tags = new ArrayList<>();
+        }
+        tags.add(tag);
+    }
 
 
 }

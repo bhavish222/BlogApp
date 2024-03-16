@@ -65,7 +65,7 @@
         <a th:href="@{'/blog/post/'+${post.id}}">
             <h2 th:text="${post.title}"></h2>
             <h2 th:text="${post.author}"></h2>
-            <p>Published Date: <span th:text="${post.publishedAt}"></span></p>
+            <p>Published Date: <span th:text="${post.publishedAt}"></span></p><br>
             <p th:text="${post.content}"></p>
         </a>
     </div>
