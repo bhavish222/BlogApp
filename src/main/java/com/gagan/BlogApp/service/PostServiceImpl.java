@@ -48,5 +48,15 @@ public class PostServiceImpl implements PostService {
 
     }
 
+    @Override
+    public List<Post> findAllPostSortedByDate() {
+        return postRepository.findAllByOrderByPublishedAtDesc();
+    }
+
+    @Override
+    public List<Post> findAllPostSortedByTitle() {
+        return postRepository.findAllByOrderByTitle();
+    }
+
 
 }

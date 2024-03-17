@@ -15,7 +15,7 @@ import java.sql.Timestamp;
 import java.util.*;
 
 @Controller
-@RequestMapping("/blog")
+//@RequestMapping("/blog")
 public class PostController {
 
     private PostService postService;
@@ -45,6 +45,7 @@ public class PostController {
         {
             tagNamesInDb.add(tag.getName());
         }
+        //List<Tag> newtagsName = new ArrayList<>();
         post.setTags(null);
         for(String tagName : tagInPost)
         {
@@ -77,7 +78,7 @@ public class PostController {
             postService.save(post);
         }
 
-        return "redirect:/blog/allposts";
+        return "redirect:/allposts";
     }
 
     @GetMapping("/allposts")
@@ -121,9 +122,33 @@ public class PostController {
     @GetMapping("/delete/{postId}")
     public String delete(@PathVariable("postId") int theId) {
         postService.deleteById(theId);
-        return "redirect:/blog/allposts";
+        return "redirect:/allposts";
 
     }
+
+    @PostMapping("/sort")
+    public String sortPosts(@ModelAttribute("selectedOption") String selectedOption, Model model){
+        if(selectedOption.equals("date")) {
+            List<Post> posts = postService.findAllPostSortedByDate();
+            model.addAttribute("posts", posts);
+        }
+        else if(selectedOption.equals("title")){
+            List<Post> posts = postService.findAllPostSortedByTitle();
+            model.addAttribute("posts", posts);
+        }else{
+            List<Post> posts = postService.findAll();
+            model.addAttribute("posts",posts);
+        }
+        return "allPosts";
+    }
+
+    @GetMapping("/search")
+    public String searchPosts(){
+
+        return "allPosts";
+    }
+
+
 
 
 }

@@ -9,12 +9,10 @@
             margin: auto;
             margin-top: 50px;
         }
-
         label, input, textarea, h1 {
             width: 100%;
             margin: 10px;
         }
-
         h1 {
             text-align: center;
         }
@@ -22,7 +20,7 @@
 </head>
 <body>
 
-<form method="POST" th:action="@{/blog/savepost}" th:object="${Post}">
+<form method="POST" th:action="@{/savepost}" th:object="${Post}">
     <h1>Create new BlogPost</h1>
 
     <input th:field="*{id}" type="hidden"/>
@@ -38,7 +36,5 @@
 
     <input type="submit" value="Publish">
 </form>
-
-
 </body>
 </html>

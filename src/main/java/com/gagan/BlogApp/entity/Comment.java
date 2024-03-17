@@ -17,6 +17,18 @@ public class Comment {
     @Column(name = "email")
     private String email;
 
+    @Override
+    public String toString() {
+        return "Comment{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                ", commentText='" + commentText + '\'' +
+                ", post=" + post +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
+    }
     @Column(name = "comment")
     private String commentText;
 
@@ -83,6 +95,5 @@ public class Comment {
         this.updatedAt = updatedAt;
     }
     public Comment() {}
-
 
 }

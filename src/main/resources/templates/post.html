@@ -7,7 +7,6 @@
             margin: 0;
             font-family: Arial, sans-serif;
         }
-
         header {
             background-color: #f0f0f0;
             padding: 20px;
@@ -16,26 +15,22 @@
             align-items: center;
             flex-direction: column;
         }
-
         h1 {
             margin: 0;
             font-size: 2em;
         }
-
         .center-justified {
             text-align: justify;
-            padding: 1rem; /* Adjust padding as needed */
-            margin: 0 auto; /* Centers the element horizontally */
-            width: fit-content; /* Ensures content width fits its natural size */
+            padding: 1rem;
+            margin: 0 auto;
+            width: fit-content;
         }
-
         .bottom-left {
             /*position: absolute;*/
             bottom: 10px;
             left: 10px;
             text-align: center;
         }
-
         .bottom-left button {
             margin-right: 10px;
         }
@@ -67,37 +62,14 @@
 </header>
 <p class="center-justified" th:text="${post.content}"></p>
 <div class="bottom-left">
-    <a th:href="@{'/blog/update/'+${post.id}}">
+    <a th:href="@{'/update/'+${post.id}}">
         <button>Update</button>
     </a>
-    <a th:href="@{'/blog/delete/'+${post.id}}">
+    <a th:href="@{'/delete/'+${post.id}}">
         <button>Delete</button>
     </a>
 </div>
 
-<!-- Comment Section -->
-<div id="comment-section">
-    <h2 class="comment-heading">Comments</h2>
-    <!-- Existing comments -->
-    <div th:each="comment : ${post.getComments()}" class="div-1">
-        <p th:text="${comment.commentText}"></p>
-        <a th:href="@{'/updateComment/' + ${comment.id}}">
-            <button>Update</button>
-        </a>
-        <a th:href="@{'/deleteComment/' + ${comment.id}}">
-            <button>Delete</button>
-        </a>
-    </div>
-</div>
-
-
-<!--&lt;!&ndash; Comment Section &ndash;&gt;-->
-<!--<div id="comment-section">-->
-<!--    <h2>Comments</h2>-->
-<!--    &lt;!&ndash; Existing comments &ndash;&gt;-->
-<!--    <div th:each="comment : ${post.getComments()}">-->
-<!--        <p th:text="${comment.commentText}"></p>-->
-<!--    </div>-->
 
 <!-- Form to add new comment -->
 <h4>Add new Comment</h4>
@@ -118,6 +90,23 @@
     <input type="submit" value="Submit">
 
 </form>
+
+
+<!-- Comment Section -->
+<div id="comment-section">
+    <h2 class="comment-heading">Comments</h2>
+    <!-- Existing comments -->
+    <div th:each="comment : ${post.getComments()}" class="div-1">
+        <p th:text="${comment.commentText}"></p>
+        <a th:href="@{'/updateComment/' + ${comment.id}}">
+            <button>Update</button>
+        </a>
+        <a th:href="@{'/deleteComment/' + ${comment.id}}">
+            <button>Delete</button>
+        </a>
+    </div>
+</div>
+
 </div>
 </body>
 </html>

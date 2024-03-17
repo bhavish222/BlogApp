@@ -8,8 +8,9 @@ public interface PostService {
 
     void save(Post post);
     List<Post> findAll();
-
     Post findById(int id);
     void deleteById(int id);
+    List<Post> findAllPostSortedByDate();
+    List<Post> findAllPostSortedByTitle();
 
 }
