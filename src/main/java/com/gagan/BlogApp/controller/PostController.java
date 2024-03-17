@@ -68,7 +68,7 @@ public class PostController {
             post.setCreatedAt(new Timestamp(System.currentTimeMillis()));
             post.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
 
-            User user = new User(1, "Gagan", "gagan@gmail.com", "1234");
+            User user = new User(2, "Rahul", "middha@gmail.com", "2001");
             model.addAttribute("user", user);
             post.setAuthor(user);
             postService.save(post);
@@ -143,7 +143,12 @@ public class PostController {
     }
 
     @GetMapping("/search")
-    public String searchPosts(){
+    public String searchPosts(@RequestParam("field") String searchField , Model model) {
+        // Now you can use the searchField variable to access the value sent from the form
+        System.out.println("Search Field: " + searchField);
+
+        List<Post> posts = postService.searchPosts(searchField);
+        model.addAttribute("posts",posts);
 
         return "allPosts";
     }
