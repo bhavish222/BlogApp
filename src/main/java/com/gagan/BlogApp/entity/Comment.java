@@ -95,5 +95,4 @@ public class Comment {
         this.updatedAt = updatedAt;
     }
     public Comment() {}
-
 }

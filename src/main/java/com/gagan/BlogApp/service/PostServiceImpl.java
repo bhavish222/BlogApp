@@ -1,13 +1,21 @@
 package com.gagan.BlogApp.service;
 
-import com.gagan.BlogApp.dao.*;
-import com.gagan.BlogApp.entity.*;
+import com.gagan.BlogApp.dao.PostRepository;
+import com.gagan.BlogApp.dao.TagRepository;
+import com.gagan.BlogApp.dao.UserRepository;
+import com.gagan.BlogApp.entity.Post;
+import com.gagan.BlogApp.entity.Tag;
+import com.gagan.BlogApp.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.util.*;
+
 
 @Service
 public class PostServiceImpl implements PostService {
@@ -28,8 +36,12 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<Post> findAll() {
-        return postRepository.findAll();
+    public List<Post> findAll(Integer pageNumber,Integer pageSize) {
+
+        Pageable p = PageRequest.of(pageNumber, pageSize);
+        Page<Post> pagePost = postRepository.findAll(p);
+        List<Post> posts = pagePost.getContent();
+        return posts;
     }
 
     @Override
@@ -74,9 +86,48 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public void deleteById(int id) {
-        postRepository.deleteById(id);
+    public List<Post> filter(Map<String, String> map) {
+        Set<Post> filteredPosts = new HashSet<>();
+        System.out.println(map);
+        boolean hasFilter = false;
+        for (String value : map.values()) {
+            if (value != null && !value.isEmpty()) {
+                hasFilter = true;
+                break;
+            }
+        }
 
+        if (!hasFilter) {
+            return postRepository.findAll();
+        }
+        //List<Post> x = new ArrayList<>();
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            if (entry.getKey().equals("author")) {
+                User user = userRepository.findByName(entry.getValue());
+                filteredPosts.addAll(postRepository.findByAuthor(user));
+            }
+            if (entry.getKey().equals("tag")) {
+                List<Tag> tags = new ArrayList<Tag>();
+                tags.add(tagRepository.findTagsByName(entry.getValue()));
+                filteredPosts.addAll(postRepository.findByTags(tags));
+            }
+            if (entry.getKey().equals("startDate") || entry.getKey().equals("endDate")) {
+                try {
+                    String startDateString = map.get("startDate");
+                    String endDateString = map.get("endDate");
+                    Timestamp startDate = Timestamp.valueOf(startDateString + " 00:00:00");
+                    Timestamp endDate = Timestamp.valueOf(endDateString + " 00:00:00");
+                    filteredPosts.addAll(postRepository.findPostByCreatedAtBetween(startDate, endDate));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return new ArrayList<>(filteredPosts);
     }
 
+    @Override
+    public void deleteById ( int id){
+        postRepository.deleteById(id);
+    }
 }

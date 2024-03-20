@@ -2,6 +2,8 @@ package com.gagan.BlogApp.dao;
 
 import com.gagan.BlogApp.entity.*;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.sql.Timestamp;
 import java.util.List;
 
 public interface PostRepository extends JpaRepository<Post, Integer> {
@@ -11,5 +13,6 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     List<Post> findByTitleContainingOrContentContaining(String title, String content);
     List<Post> findByAuthor(User author);
     List<Post> findByTags(List<Tag> tags);
-
+    List<Post> findPostByCreatedAt(Timestamp date);
+    List<Post> findPostByCreatedAtBetween(Timestamp start, Timestamp end);
 }

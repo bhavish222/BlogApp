@@ -6,11 +6,14 @@ import com.gagan.BlogApp.entity.Tag;
 import com.gagan.BlogApp.entity.User;
 import com.gagan.BlogApp.service.PostService;
 import com.gagan.BlogApp.service.TagService;
+import com.gagan.BlogApp.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.awt.print.Pageable;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -20,11 +23,13 @@ public class PostController {
 
     private PostService postService;
     private TagService tagService;
+    private UserService userService;
 
     @Autowired
-    public PostController(PostService thePostService, TagService tagService) {
-        postService = thePostService;
+    public PostController(PostService postService, TagService tagService, UserService userService) {
+        this.postService = postService;
         this.tagService = tagService;
+        this.userService = userService;
     }
 
     @GetMapping("/newpost")
@@ -45,7 +50,6 @@ public class PostController {
         {
             tagNamesInDb.add(tag.getName());
         }
-        //List<Tag> newtagsName = new ArrayList<>();
         post.setTags(null);
         for(String tagName : tagInPost)
         {
@@ -80,14 +84,15 @@ public class PostController {
 
         return "redirect:/allposts";
     }
-
     @GetMapping("/allposts")
-    public String allPosts(Model theModel) {
+    public String allPosts(@RequestParam(value = "pageNumber",defaultValue = "0",required = false) Integer pageNumber,
+                           @RequestParam(value = "pageSize",defaultValue = "3",required = false)Integer pageSize,
+                           Model model) {
 
-        // create model attribute to bind form data
-        List<Post> posts = postService.findAll();
-        theModel.addAttribute("posts", posts);
-        return "allPosts";
+        List<Post> posts = postService.findAll(pageNumber,pageSize);
+        model.addAttribute("posts",posts);
+        model.addAttribute("pageNumber",pageNumber);
+        return prepareModelAndReturnView(posts, model);
     }
 
     @GetMapping("/post/{postId}")
@@ -95,8 +100,22 @@ public class PostController {
         Post post = postService.findById(postId);
         theModel.addAttribute("post", post);
         theModel.addAttribute("Comment",new Comment());
+        String tags = new String();
+        List<Tag> tagList = post.getTags();
+        for(int i=0;i<tagList.size();i++)
+        {
+            if(i==tagList.size()-1)
+            {
+                tags+=tagList.get(i);
+            }
+            else {
+                tags +=tagList.get(i)+ ",";
+            }
+        }
+        theModel.addAttribute(("tags"),tags);
         return "post";
     }
+
 
     @GetMapping("/update/{postId}")
     public String update(@PathVariable("postId") int postId, Model theModel) {
@@ -128,18 +147,21 @@ public class PostController {
 
     @PostMapping("/sort")
     public String sortPosts(@ModelAttribute("selectedOption") String selectedOption, Model model){
+        List<Post> posts = new ArrayList<>();
         if(selectedOption.equals("date")) {
-            List<Post> posts = postService.findAllPostSortedByDate();
+            posts.addAll(postService.findAllPostSortedByDate());
             model.addAttribute("posts", posts);
         }
         else if(selectedOption.equals("title")){
-            List<Post> posts = postService.findAllPostSortedByTitle();
+            posts.addAll(postService.findAllPostSortedByTitle());
             model.addAttribute("posts", posts);
-        }else{
-            List<Post> posts = postService.findAll();
-            model.addAttribute("posts",posts);
         }
-        return "allPosts";
+//        else{
+//            posts.addAll(postService.findAll());
+//            model.addAttribute("posts",posts);
+//        }
+
+        return prepareModelAndReturnView(posts, model);
     }
 
     @GetMapping("/search")
@@ -148,12 +170,22 @@ public class PostController {
         System.out.println("Search Field: " + searchField);
 
         List<Post> posts = postService.searchPosts(searchField);
-        model.addAttribute("posts",posts);
+        return prepareModelAndReturnView(posts, model);
+    }
+    @GetMapping("/filter")
+    public String filter( @RequestParam Map<String, String> op, Model model) {
 
-        return "allPosts";
+        List<Post> posts = postService.filter(op);
+        return prepareModelAndReturnView(posts, model);
     }
 
+    private String prepareModelAndReturnView(List<Post> posts, Model model) {
+        List<Tag> tags = tagService.findAllTags();
+        List<User> users = userService.findAll();
 
-
-
+        model.addAttribute("posts", posts);
+        model.addAttribute("tags", tags);
+        model.addAttribute("users", users);
+        return "allPosts";
+    }
 }
