@@ -25,15 +25,9 @@ public class CommentServiceImpl implements CommentService{
 
     @Override
     public void save(Comment comment, int postId) {
-        Optional<Post> postOptional = postRepository.findById(postId);
-
-        if(postOptional.isPresent()){
-            Post post = postOptional.get();
-
-            comment.setPost(post);
-            comment.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
-            commentRepository.save(comment);
-        }
+        comment.setPost(postRepository.findById(postId));
+        comment.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+        commentRepository.save(comment);
     }
     @Override
     public List<Comment> findAll() {

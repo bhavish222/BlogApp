@@ -8,14 +8,10 @@ import com.gagan.BlogApp.entity.Tag;
 import com.gagan.BlogApp.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
 import java.sql.Timestamp;
-import java.text.ParseException;
 import java.util.*;
-
 
 @Service
 public class PostServiceImpl implements PostService {
@@ -37,10 +33,9 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public List<Post> findAll(Integer pageNumber,Integer pageSize) {
-
-        Pageable p = PageRequest.of(pageNumber, pageSize);
-        Page<Post> pagePost = postRepository.findAll(p);
-        List<Post> posts = pagePost.getContent();
+        //Pageable p = PageRequest.of(pageNumber, pageSize);
+        //Page<Post> pagePost = postRepository.findAll(p);
+        List<Post> posts = postRepository.findAll();
         return posts;
     }
 
@@ -56,78 +51,97 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Post findById(int id) {
-        Optional<Post> result = postRepository.findById(id);
-        Post post = null;
-
-        if (result.isPresent()) {
-            post = result.get();
-        } else {
-            // we didn't find the employee
-            throw new RuntimeException("Did not find employee id - " + id);
-        }
-        return post;
-    }
+    public Post findById(int id) { return postRepository.findById(id); }
 
     @Override
     public List<Post> searchPosts(String searchText) {
-        List<Post> searchPosts = new ArrayList<>();
-
+        if(searchText==null || searchText.isEmpty())
+        {
+            return postRepository.findAll();
+        }
+        Set<Post> searchPosts = new HashSet<>();
         searchPosts.addAll(postRepository.findByTitleContainingOrContentContaining(searchText, searchText));
         //find user
         User user = userRepository.findByName(searchText);
         searchPosts.addAll(postRepository.findByAuthor(user));
         //find tags
         List<Tag> tags = new ArrayList<Tag>();
-        tags.add(tagRepository.findTagsByName(searchText));
+        tags.add(tagRepository.findTagByName(searchText));
         searchPosts.addAll(postRepository.findByTags(tags));
 
-        return searchPosts;
+        return new ArrayList<>(searchPosts);
     }
 
     @Override
-    public List<Post> filter(Map<String, String> map) {
+    public List<Post> filter(List<String> authors, List<String> filterTags, String startDate, String endDate) {
         Set<Post> filteredPosts = new HashSet<>();
-        System.out.println(map);
-        boolean hasFilter = false;
-        for (String value : map.values()) {
-            if (value != null && !value.isEmpty()) {
-                hasFilter = true;
-                break;
-            }
+        if (authors==null && filterTags==null && startDate==null && endDate==null) {
+            return null;
         }
-
-        if (!hasFilter) {
-            return postRepository.findAll();
-        }
-        //List<Post> x = new ArrayList<>();
-        for (Map.Entry<String, String> entry : map.entrySet()) {
-            if (entry.getKey().equals("author")) {
-                User user = userRepository.findByName(entry.getValue());
-                filteredPosts.addAll(postRepository.findByAuthor(user));
-            }
-            if (entry.getKey().equals("tag")) {
-                List<Tag> tags = new ArrayList<Tag>();
-                tags.add(tagRepository.findTagsByName(entry.getValue()));
-                filteredPosts.addAll(postRepository.findByTags(tags));
-            }
-            if (entry.getKey().equals("startDate") || entry.getKey().equals("endDate")) {
-                try {
-                    String startDateString = map.get("startDate");
-                    String endDateString = map.get("endDate");
-                    Timestamp startDate = Timestamp.valueOf(startDateString + " 00:00:00");
-                    Timestamp endDate = Timestamp.valueOf(endDateString + " 00:00:00");
-                    filteredPosts.addAll(postRepository.findPostByCreatedAtBetween(startDate, endDate));
-                } catch (Exception e) {
-                    e.printStackTrace();
+        if (authors != null) {
+            for (String authorName : authors) {
+                User user = userRepository.findByName(authorName);
+                if (user != null) {
+                    filteredPosts.addAll(postRepository.findByAuthor(user));
                 }
             }
         }
+        if (filterTags != null && !filterTags.isEmpty()) {
+            for (String tagName : filterTags) {
+                Tag tag = tagRepository.findTagByName(tagName);
+                System.out.println(tag);
+                if (tag != null) {
+                    filteredPosts.addAll(postRepository.findByTags(Collections.singletonList(tag)));
+                }
+            }
+        }
+        if (startDate != null && endDate != null) {
+            try {
+                Timestamp startDateTime = Timestamp.valueOf(startDate + " 00:00:00");
+                Timestamp endDateTime = Timestamp.valueOf(endDate + " 23:59:59");
+                filteredPosts.addAll(postRepository.findPostByCreatedAtBetween(startDateTime, endDateTime));
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+            }
+        }
         return new ArrayList<>(filteredPosts);
+    }
+    public List<Post> sortPosts(List<Post> posts, String selectedOption, Pageable pageable) {
+        Page<Post> sortedPosts;
+        if (selectedOption.equals("asc")) {
+            sortedPosts = postRepository.findPostsByOrderByCreatedAtAsc(posts, pageable);
+            System.out.println("Posts coming in sort function " + posts);
+        } else {
+            sortedPosts = postRepository.findPostsByOrderByCreatedAtDesc(posts, pageable);
+        }
+        System.out.println("Sorted posts: " + sortedPosts.getContent());
+        return sortedPosts.getContent();
+    }
+
+
+    @Override
+    public List<Post> findposts(String searchField, String selectedOption, List<String> authors, List<String> filterTags, String startDate, String endDate, Pageable pageable) {
+        List<Post> searchedPosts = searchPosts(searchField);
+        System.out.println("Posts coming in search function " + searchedPosts);
+        List<Post> filteredPosts = filter(authors,filterTags,startDate,endDate);
+        System.out.println("Posts coming in filtered function " + filteredPosts);
+        List<Post> commonPosts = new ArrayList<>();
+        if (filteredPosts == null || filteredPosts.isEmpty()) {
+            commonPosts = searchedPosts;
+        } else {
+            for (Post post : searchedPosts) {
+                if (filteredPosts.contains(post)) {
+                    commonPosts.add(post);
+                }
+            }
+        }
+        System.out.println("commmon posts " + commonPosts);
+        return sortPosts(commonPosts,selectedOption,pageable);
     }
 
     @Override
     public void deleteById ( int id){
         postRepository.deleteById(id);
     }
+
 }

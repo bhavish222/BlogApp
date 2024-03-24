@@ -9,11 +9,11 @@ import com.gagan.BlogApp.service.TagService;
 import com.gagan.BlogApp.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.awt.print.Pageable;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -50,6 +50,7 @@ public class PostController {
         {
             tagNamesInDb.add(tag.getName());
         }
+        //List<Tag> newtagsName = new ArrayList<>();
         post.setTags(null);
         for(String tagName : tagInPost)
         {
@@ -86,13 +87,36 @@ public class PostController {
     }
     @GetMapping("/allposts")
     public String allPosts(@RequestParam(value = "pageNumber",defaultValue = "0",required = false) Integer pageNumber,
-                           @RequestParam(value = "pageSize",defaultValue = "3",required = false)Integer pageSize,
+                           @RequestParam(value = "pageSize",defaultValue = "2",required = false)Integer pageSize,
+                           @RequestParam(value = "field", required = false) String searchField,
+                           @RequestParam(value = "selectedOption",defaultValue = "desc",required = false) String selectedOption,
+                           @RequestParam(value = "authors", required = false)  List<String >authors,
+                           @RequestParam(value = "tags", required = false) List<String> filterTags,
+                           @RequestParam(value = "startDate", required = false) String startDate,
+                           @RequestParam(value = "endDate", required = false) String endDate,
                            Model model) {
+        System.out.println(searchField);
+        System.out.println(selectedOption);
+        System.out.println(authors);
+        System.out.println(filterTags);
+        System.out.println(startDate);
+        System.out.println(endDate);
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        List<Post> posts = postService.findposts(searchField,selectedOption,authors,filterTags,startDate,endDate,pageable);
 
-        List<Post> posts = postService.findAll(pageNumber,pageSize);
-        model.addAttribute("posts",posts);
-        model.addAttribute("pageNumber",pageNumber);
-        return prepareModelAndReturnView(posts, model);
+        List<Tag> tags = tagService.findAllTags();
+        List<User> users = userService.findAll();
+
+        model.addAttribute("startDate", startDate);
+        model.addAttribute("endDate", endDate);
+        model.addAttribute("selectedTags", filterTags);
+        model.addAttribute("authors", authors);
+        model.addAttribute("selectedOption", selectedOption);
+        model.addAttribute("field", searchField);
+        model.addAttribute("posts", posts);
+        model.addAttribute("tags", tags);
+        model.addAttribute("users", users);
+        return "allPosts";
     }
 
     @GetMapping("/post/{postId}")
@@ -145,6 +169,15 @@ public class PostController {
 
     }
 
+//    @GetMapping("/search")
+//    public String searchPosts(@RequestParam("field") String searchField , Model model) {
+//        // Now you can use the searchField variable to access the value sent from the form
+//        System.out.println("Search Field: " + searchField);
+//
+//        List<Post> posts = postService.searchPosts(searchField);
+//        return prepareModelAndReturnView(posts, model);
+//    }
+
     @PostMapping("/sort")
     public String sortPosts(@ModelAttribute("selectedOption") String selectedOption, Model model){
         List<Post> posts = new ArrayList<>();
@@ -163,21 +196,12 @@ public class PostController {
 
         return prepareModelAndReturnView(posts, model);
     }
-
-    @GetMapping("/search")
-    public String searchPosts(@RequestParam("field") String searchField , Model model) {
-        // Now you can use the searchField variable to access the value sent from the form
-        System.out.println("Search Field: " + searchField);
-
-        List<Post> posts = postService.searchPosts(searchField);
-        return prepareModelAndReturnView(posts, model);
-    }
-    @GetMapping("/filter")
-    public String filter( @RequestParam Map<String, String> op, Model model) {
-
-        List<Post> posts = postService.filter(op);
-        return prepareModelAndReturnView(posts, model);
-    }
+//    @GetMapping("/filter")
+//    public String filter( @RequestParam Map<String, String> op, Model model) {
+//
+//        List<Post> posts = postService.filter(op);
+//        return prepareModelAndReturnView(posts, model);
+//    }
 
     private String prepareModelAndReturnView(List<Post> posts, Model model) {
         List<Tag> tags = tagService.findAllTags();
