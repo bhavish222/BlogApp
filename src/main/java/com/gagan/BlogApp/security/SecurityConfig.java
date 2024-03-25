@@ -21,7 +21,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public UserDetailsManager userDetailsManager(DataSource dataSource){
+    public UserDetailsManager userDetailsManager(DataSource dataSource) {
 
         JdbcUserDetailsManager userDetailsManager = new JdbcUserDetailsManager(dataSource);
 
@@ -36,16 +36,17 @@ public class SecurityConfig {
 
         return userDetailsManager;
     }
+
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception{
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
                 .csrf(csrf -> csrf.disable())
 
                 .authorizeHttpRequests(configurer ->
                         configurer
-                                .requestMatchers("/allposts","/post/{postId}","/api/**",
+                                .requestMatchers("/allposts", "/post/{postId}", "/api/**",
                                         "/register").permitAll()
-                                .requestMatchers("/newpost").hasAnyRole("AUTHOR","ADMIN")
+                                .requestMatchers("/newpost").hasAnyRole("AUTHOR", "ADMIN")
                                 .anyRequest().authenticated()
                 )
                 .formLogin(form ->

@@ -1,5 +1,6 @@
 package com.gagan.BlogApp.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 import java.sql.Timestamp;
@@ -61,6 +62,7 @@ public class Tag {
         this.posts = posts;
     }
 
+    @JsonBackReference
     @ManyToMany(fetch = FetchType.EAGER,
             cascade = {CascadeType.PERSIST, CascadeType.MERGE,
                     CascadeType.DETACH, CascadeType.REFRESH})
@@ -73,7 +75,7 @@ public class Tag {
 
     @Override
     public String toString() {
-        return name ;
+        return name;
     }
 
     //add a method to set  posts

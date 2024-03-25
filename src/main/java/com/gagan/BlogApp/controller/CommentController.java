@@ -3,16 +3,17 @@ package com.gagan.BlogApp.controller;
 
 import com.gagan.BlogApp.entity.Comment;
 import com.gagan.BlogApp.entity.Post;
-import com.gagan.BlogApp.entity.Tag;
 import com.gagan.BlogApp.service.CommentService;
 import com.gagan.BlogApp.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import java.sql.Timestamp;
-import java.util.List;
 
 @Controller
 public class CommentController {
@@ -20,7 +21,7 @@ public class CommentController {
     private PostService postService;
 
     @Autowired
-    public CommentController(CommentService commentService,PostService postService) {
+    public CommentController(CommentService commentService, PostService postService) {
         this.postService = postService;
         this.commentService = commentService;
     }
@@ -31,7 +32,6 @@ public class CommentController {
         commentService.save(comment, postId);
         return "redirect:/post/" + postId;
     }
-
 
     @GetMapping("/updateComment/{commentId}")
     public String updateComment(@PathVariable("commentId") int id, Model theModel) {
@@ -44,7 +44,7 @@ public class CommentController {
     }
 
     @GetMapping("/deleteComment/{commentId}")
-    public String deleteComment(@PathVariable("commentId") int theId ) {
+    public String deleteComment(@PathVariable("commentId") int theId) {
         Comment comment = commentService.findById(theId);
         commentService.deleteById(theId);
         int postId = comment.getPost().getId();

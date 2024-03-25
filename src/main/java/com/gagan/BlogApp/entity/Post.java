@@ -1,7 +1,7 @@
 package com.gagan.BlogApp.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,32 +13,25 @@ public class Post {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private int id;
-
     @Column(name = "title")
     private String title;
     @Column(name = "excerpt")
     private String excerpt;
-
     @Column(name = "content")
     private String content;
-
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE,
             CascadeType.DETACH, CascadeType.REFRESH})
     @JoinColumn(name = "author_id")
     private User author;
-
     @Column(name = "published_at")
     private Timestamp publishedAt;
-
     @Column(name = "is_published")
     private boolean isPublished;
-
     @Column(name = "created_at", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private Timestamp createdAt;
-
     @Column(name = "updated_at", columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private Timestamp updatedAt;
-
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL)
     private List<Comment> comments;
 
@@ -156,6 +149,4 @@ public class Post {
         }
         tags.add(tag);
     }
-
-
 }

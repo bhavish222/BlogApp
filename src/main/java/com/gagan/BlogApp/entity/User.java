@@ -1,5 +1,6 @@
 package com.gagan.BlogApp.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import java.util.List;
 
@@ -11,7 +12,7 @@ public class User {
     @Column(name = "id")
     private Integer id;
 
-    @Column(name = "name")
+    @Column(name = "username")
     private String name;
     @Column(name = "email")
     private String email;
@@ -19,6 +20,16 @@ public class User {
     @Column(name = "password")
     private String password;
 
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    // @JsonManagedReference
+    @JsonBackReference
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL)
     private List<Post> posts;
 

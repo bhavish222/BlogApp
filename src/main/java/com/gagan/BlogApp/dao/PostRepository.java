@@ -6,7 +6,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -23,10 +22,6 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
     @Query("SELECT p FROM Post p WHERE p.id IN (SELECT post.id FROM Post post WHERE post IN :posts) ORDER BY p.createdAt ASC")
     Page<Post> findPostsByOrderByCreatedAtAsc(@Param("posts") List<Post> posts,Pageable pageable);
 
-
     @Query("SELECT p FROM Post p WHERE p IN :posts ORDER BY p.createdAt DESC")
     Page<Post> findPostsByOrderByCreatedAtDesc(@Param(value = "posts") List<Post> posts,Pageable pageable);
-
-//    List<Post> findByIdInOrderByCreatedAtAsc(List<Integer> postIds);
-//    List<Post> findByIdInOrderByCreatedAtDesc(List<Integer> postIds);
 }

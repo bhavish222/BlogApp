@@ -10,15 +10,15 @@ import com.gagan.BlogApp.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.Timestamp;
-import java.util.*;
+import java.util.List;
 
 @Controller
-//@RequestMapping("/blog")
 public class PostController {
 
     private PostService postService;
@@ -40,57 +40,17 @@ public class PostController {
     }
 
     @PostMapping("/savepost")
-    public String savePost(@ModelAttribute("Post") Post post, @RequestParam("tagString")String tagString, Model model) {
-        System.out.println(tagString);
-
-        List<String> tagInPost = Arrays.asList(tagString.split(","));
-        List<Tag> tagsInDb = tagService.findAllTags();
-        Set<String> tagNamesInDb = new HashSet<>();
-        for(Tag tag : tagsInDb)
-        {
-            tagNamesInDb.add(tag.getName());
-        }
-        //List<Tag> newtagsName = new ArrayList<>();
-        post.setTags(null);
-        for(String tagName : tagInPost)
-        {
-            if (!tagNamesInDb.contains(tagName))
-            {
-                Tag tag = new Tag(tagName);
-                post.addtag(tag);
-            }
-            else {
-                Tag newTag = tagService.findTagByName(tagName);
-                post.addtag(newTag);
-            }
-        }
-        if (post.getId() == 0) {
-            String content = post.getContent();
-            String excerpt = content.length() > 30 ? content.substring(0, 30) : content;
-            post.setExcerpt(excerpt);
-            post.setIsPublished(true);
-            post.setPublishedAt(new Timestamp(System.currentTimeMillis()));
-            post.setCreatedAt(new Timestamp(System.currentTimeMillis()));
-            post.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
-
-            User user = new User(2, "Rahul", "middha@gmail.com", "2001");
-            model.addAttribute("user", user);
-            post.setAuthor(user);
-            postService.save(post);
-        } else {
-            Post existingPost = postService.findById(post.getId());
-            post.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
-            postService.save(post);
-        }
-
+    public String savePost(@ModelAttribute("Post") Post post, @RequestParam("tagString") String tagString, Model model, Authentication authentication) {
+        postService.save(post, tagString, authentication);
         return "redirect:/allposts";
     }
+
     @GetMapping("/allposts")
-    public String allPosts(@RequestParam(value = "pageNumber",defaultValue = "0",required = false) Integer pageNumber,
-                           @RequestParam(value = "pageSize",defaultValue = "2",required = false)Integer pageSize,
+    public String allPosts(@RequestParam(value = "pageNumber", defaultValue = "0", required = false) Integer pageNumber,
+                           @RequestParam(value = "pageSize", defaultValue = "3", required = false) Integer pageSize,
                            @RequestParam(value = "field", required = false) String searchField,
-                           @RequestParam(value = "selectedOption",defaultValue = "desc",required = false) String selectedOption,
-                           @RequestParam(value = "authors", required = false)  List<String >authors,
+                           @RequestParam(value = "selectedOption", defaultValue = "desc", required = false) String selectedOption,
+                           @RequestParam(value = "authors", required = false) List<String> authors,
                            @RequestParam(value = "tags", required = false) List<String> filterTags,
                            @RequestParam(value = "startDate", required = false) String startDate,
                            @RequestParam(value = "endDate", required = false) String endDate,
@@ -102,11 +62,12 @@ public class PostController {
         System.out.println(startDate);
         System.out.println(endDate);
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
-        List<Post> posts = postService.findposts(searchField,selectedOption,authors,filterTags,startDate,endDate,pageable);
+        List<Post> posts = postService.findposts(searchField, selectedOption, authors, filterTags, startDate, endDate, pageable);
 
         List<Tag> tags = tagService.findAllTags();
         List<User> users = userService.findAll();
 
+        model.addAttribute("pageNumber", pageNumber);
         model.addAttribute("startDate", startDate);
         model.addAttribute("endDate", endDate);
         model.addAttribute("selectedTags", filterTags);
@@ -123,38 +84,31 @@ public class PostController {
     public String post(@PathVariable("postId") int postId, Model theModel) {
         Post post = postService.findById(postId);
         theModel.addAttribute("post", post);
-        theModel.addAttribute("Comment",new Comment());
+        theModel.addAttribute("Comment", new Comment());
         String tags = new String();
         List<Tag> tagList = post.getTags();
-        for(int i=0;i<tagList.size();i++)
-        {
-            if(i==tagList.size()-1)
-            {
-                tags+=tagList.get(i);
-            }
-            else {
-                tags +=tagList.get(i)+ ",";
+        for (int i = 0; i < tagList.size(); i++) {
+            if (i == tagList.size() - 1) {
+                tags += tagList.get(i);
+            } else {
+                tags += tagList.get(i) + ",";
             }
         }
-        theModel.addAttribute(("tags"),tags);
+        theModel.addAttribute(("tags"), tags);
         return "post";
     }
 
 
     @GetMapping("/update/{postId}")
     public String update(@PathVariable("postId") int postId, Model theModel) {
-        // Use the postService to find the post by its ID
         Post post = postService.findById(postId);
         String tagString = new String();
         List<Tag> tagList = post.getTags();
-        for(int i=0;i<tagList.size();i++)
-        {
-            if(i==tagList.size()-1)
-            {
-                tagString+=tagList.get(i);
-            }
-            else {
-                tagString +=tagList.get(i)+ ",";
+        for (int i = 0; i < tagList.size(); i++) {
+            if (i == tagList.size() - 1) {
+                tagString += tagList.get(i);
+            } else {
+                tagString += tagList.get(i) + ",";
             }
         }
         theModel.addAttribute("Post", post);
@@ -163,53 +117,13 @@ public class PostController {
     }
 
     @GetMapping("/delete/{postId}")
-    public String delete(@PathVariable("postId") int theId) {
-        postService.deleteById(theId);
-        return "redirect:/allposts";
-
-    }
-
-//    @GetMapping("/search")
-//    public String searchPosts(@RequestParam("field") String searchField , Model model) {
-//        // Now you can use the searchField variable to access the value sent from the form
-//        System.out.println("Search Field: " + searchField);
-//
-//        List<Post> posts = postService.searchPosts(searchField);
-//        return prepareModelAndReturnView(posts, model);
-//    }
-
-    @PostMapping("/sort")
-    public String sortPosts(@ModelAttribute("selectedOption") String selectedOption, Model model){
-        List<Post> posts = new ArrayList<>();
-        if(selectedOption.equals("date")) {
-            posts.addAll(postService.findAllPostSortedByDate());
-            model.addAttribute("posts", posts);
+    public String delete(@PathVariable("postId") int theId, Authentication authentication) {
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        boolean userAuthorized = postService.isUserAuthorized(userDetails, theId);
+        if (userAuthorized) {
+            postService.deleteById(theId);
+            return "redirect:/allposts";
         }
-        else if(selectedOption.equals("title")){
-            posts.addAll(postService.findAllPostSortedByTitle());
-            model.addAttribute("posts", posts);
-        }
-//        else{
-//            posts.addAll(postService.findAll());
-//            model.addAttribute("posts",posts);
-//        }
-
-        return prepareModelAndReturnView(posts, model);
-    }
-//    @GetMapping("/filter")
-//    public String filter( @RequestParam Map<String, String> op, Model model) {
-//
-//        List<Post> posts = postService.filter(op);
-//        return prepareModelAndReturnView(posts, model);
-//    }
-
-    private String prepareModelAndReturnView(List<Post> posts, Model model) {
-        List<Tag> tags = tagService.findAllTags();
-        List<User> users = userService.findAll();
-
-        model.addAttribute("posts", posts);
-        model.addAttribute("tags", tags);
-        model.addAttribute("users", users);
-        return "allPosts";
+        return "accessDenied";
     }
 }

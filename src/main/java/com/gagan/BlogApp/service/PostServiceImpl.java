@@ -9,6 +9,8 @@ import com.gagan.BlogApp.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.util.*;
@@ -27,14 +29,58 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public void save(Post post) {
+    public void savePostFromRest(Post post){
         postRepository.save(post);
+    }
+    @Override
+    public void save(Post post, String tagString, Authentication authentication) {
+
+        List<String> tagInPost = Arrays.asList(tagString.split(","));
+        List<Tag> tagsInDb = tagRepository.findAll();
+        Set<String> tagNamesInDb = new HashSet<>();
+        for(Tag tag : tagsInDb)
+        {
+            tagNamesInDb.add(tag.getName());
+        }
+        post.setTags(null);
+        for(String tagName : tagInPost)
+        {
+            if (!tagNamesInDb.contains(tagName))
+            {
+                Tag tag = new Tag(tagName);
+                post.addtag(tag);
+            }
+            else {
+                Tag newTag = tagRepository.findTagByName(tagName);
+                post.addtag(newTag);
+            }
+        }
+        String content = post.getContent();
+        String excerpt = content.length() > 30 ? content.substring(0, 30) : content;
+        post.setExcerpt(excerpt);
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        String username = userDetails.getUsername();
+        User user = userRepository.findByName(username);
+        post.setAuthor(user);
+        if (post.getId() == 0) {
+
+            post.setIsPublished(true);
+            post.setPublishedAt(new Timestamp(System.currentTimeMillis()));
+            post.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+            post.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+
+            //postRepository.save(post);
+        } else {
+            // Post existingPost = postRepository.findById(post.getId());
+            post.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+
+        }
+        postRepository.save(post);
+
     }
 
     @Override
     public List<Post> findAll(Integer pageNumber,Integer pageSize) {
-        //Pageable p = PageRequest.of(pageNumber, pageSize);
-        //Page<Post> pagePost = postRepository.findAll(p);
         List<Post> posts = postRepository.findAll();
         return posts;
     }
@@ -110,11 +156,11 @@ public class PostServiceImpl implements PostService {
         Page<Post> sortedPosts;
         if (selectedOption.equals("asc")) {
             sortedPosts = postRepository.findPostsByOrderByCreatedAtAsc(posts, pageable);
-            System.out.println("Posts coming in sort function " + posts);
+            //System.out.println("Posts coming in sort function " + posts);
         } else {
             sortedPosts = postRepository.findPostsByOrderByCreatedAtDesc(posts, pageable);
         }
-        System.out.println("Sorted posts: " + sortedPosts.getContent());
+        //System.out.println("Sorted posts: " + sortedPosts.getContent());
         return sortedPosts.getContent();
     }
 
@@ -122,9 +168,9 @@ public class PostServiceImpl implements PostService {
     @Override
     public List<Post> findposts(String searchField, String selectedOption, List<String> authors, List<String> filterTags, String startDate, String endDate, Pageable pageable) {
         List<Post> searchedPosts = searchPosts(searchField);
-        System.out.println("Posts coming in search function " + searchedPosts);
+        //System.out.println("Posts coming in search function " + searchedPosts);
         List<Post> filteredPosts = filter(authors,filterTags,startDate,endDate);
-        System.out.println("Posts coming in filtered function " + filteredPosts);
+        //System.out.println("Posts coming in filtered function " + filteredPosts);
         List<Post> commonPosts = new ArrayList<>();
         if (filteredPosts == null || filteredPosts.isEmpty()) {
             commonPosts = searchedPosts;
@@ -135,7 +181,7 @@ public class PostServiceImpl implements PostService {
                 }
             }
         }
-        System.out.println("commmon posts " + commonPosts);
+        //System.out.println("commmon posts " + commonPosts);
         return sortPosts(commonPosts,selectedOption,pageable);
     }
 
@@ -144,4 +190,19 @@ public class PostServiceImpl implements PostService {
         postRepository.deleteById(id);
     }
 
+    @Override
+    public boolean isUserAuthorized(UserDetails userDetails, Integer postId){
+        Post post = findById(postId);
+        boolean isAuthorized = false;
+        if( userDetails==null){
+            return false;
+        }
+        else if(userDetails.getAuthorities().toString().contains("ROLE_ADMIN")){
+            isAuthorized = true;
+        } else if (userDetails.getUsername().equals(post.getAuthor().toString())) {
+            isAuthorized = true;
+        }
+
+        return isAuthorized;
+    }
 }
