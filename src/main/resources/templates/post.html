@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+>
 <head>
     <title>Blog Post</title>
     <style>
@@ -7,6 +8,7 @@
             margin: 0;
             font-family: Arial, sans-serif;
         }
+
         header {
             background-color: #f0f0f0;
             padding: 20px;
@@ -15,22 +17,27 @@
             align-items: center;
             flex-direction: column;
         }
+
         h1 {
             margin: 0;
             font-size: 2em;
         }
+
         .center-justified {
             text-align: justify;
-            padding: 1rem;
-            margin: 0 auto;
-            width: fit-content;
+            padding: 1rem; /* Adjust padding as needed */
+            margin: 0 auto; /* Centers the element horizontally */
+            width: 70%; /* Ensures content width fits its natural size */
+            font-size: 1.2rem;
         }
+
         .bottom-left {
             /*position: absolute;*/
             bottom: 10px;
             left: 10px;
             text-align: center;
         }
+
         .bottom-left button {
             margin-right: 10px;
         }
@@ -56,26 +63,35 @@
     </style>
 </head>
 <body>
+<span th:unless="${#authorization.expression('isAuthenticated()')}">
+        <form th:action="@{/loginPage}" method="GET">
+            <input type="submit" value="Login">
+        </form>
+    </span>
 <header>
     <h1><span th:text="${post.title}"></span></h1><br><br>
     <p th:text="${post.author}"></p>
+    <p th:text="${post.tags}"></p>
 </header>
 <p class="center-justified" th:text="${post.content}"></p>
 <div class="bottom-left">
+    <span th:if="${#authorization.expression('isAuthenticated()')}">
     <a th:href="@{'/update/'+${post.id}}">
         <button>Update</button>
     </a>
     <a th:href="@{'/delete/'+${post.id}}">
         <button>Delete</button>
     </a>
+    </span>
 </div>
 
+<hr>
 
 <!-- Form to add new comment -->
-<h4>Add new Comment</h4>
+<h4 style="margin-top: 2rem">Add new Comment</h4>
 <form th:action="@{/addComment/{postId}(postId=${post.id})}" th:object="${Comment}" method="POST">
 
-    <label for="id">Name: </label>
+    <!--    <label for="id">Name: </label>-->
     <input id="id" type="hidden" th:field="*{id}"/>
 
     <label for="name">Name: </label>
@@ -90,7 +106,6 @@
     <input type="submit" value="Submit">
 
 </form>
-
 
 <!-- Comment Section -->
 <div id="comment-section">

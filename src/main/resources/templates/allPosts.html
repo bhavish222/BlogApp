@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
@@ -152,10 +152,38 @@
             display: flex;
             justify-content: space-between;
         }
+        #navbar-top{
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
-<h1>My Blog Application</h1>
+
+<div id="navbar-top">
+
+ <span th:if="${#authorization.expression('isAuthenticated()')}">
+        <h1><span th:text = "${#authentication.principal.username}" ></span></h1>
+    </span>
+
+    <a th:href="@{'/allposts'}">
+        <h1 style="color: black;">My Blog Application</h1>
+    </a>
+
+    <span th:if="${#authorization.expression('isAuthenticated()')}">
+    <form th:action="@{/logout}" method="POST">
+        <input type="submit" value="Logout">
+    </form>
+    </span>
+
+    <span th:unless="${#authorization.expression('isAuthenticated()')}">
+        <form th:action="@{/loginPage}" method="GET">
+            <input type="submit" value="Login">
+        </form>
+    </span>
+
+</div>
 
 <!--filter section-->
 <div class="outer-container">
@@ -214,7 +242,10 @@
             </form>
         </div>
 
+
+        <span th:if="${#authorization.expression('isAuthenticated()')}">
         <a th:href="@{/newpost}" class="anchor1">Create New Post</a>
+        </span>
 
 
         <div class="post-list">
@@ -230,33 +261,6 @@
     </div>
 </div>
 
-<!--<div class="pagination">-->
-<!--    <form method="GET" th:action="@{/allposts}">-->
-<!--        <input type="hidden" name="pageNumber" th:value="${pageNumber == null or pageNumber == 0 ? 0 : pageNumber - 1}"/>-->
-<!--        <input type="hidden" name="pageSize" th:value="${pageSize}"/>-->
-<!--        <input type="hidden" name="field" th:value="${field}"/>-->
-<!--        <input type="hidden" name="selectedOption" th:value="${selectedOption}"/>-->
-<!--        <input type="hidden" name="authors" th:if="${authors != null}" th:each="author : ${authors}" th:value="${author}"/>-->
-<!--        <input type="hidden" name="tags" th:if="${selectedTags != null}" th:each="tag : ${selectedTags}" th:value="${tag}"/>-->
-<!--        <input type="hidden" name="startDate" th:value="${startDate}"/>-->
-<!--        <input type="hidden" name="endDate" th:value="${endDate}"/>-->
-<!--&lt;!&ndash;        <input name="pageNumber" th:value="${pageNumber == null or pageNumber == 0 ? 0 : pageNumber - 1}" type="hidden"/>&ndash;&gt;-->
-<!--        <button th:disabled="${pageNumber == null or pageNumber == 0}" type="submit">Previous</button>-->
-<!--    </form>-->
-
-<!--    <form method="GET" th:action="@{/allposts}">-->
-<!--        <input type="hidden" name="pageNumber" th:value="${pageNumber == null ? 1 : pageNumber + 1}"/>-->
-<!--        <input type="hidden" name="pageSize" th:value="${pageSize}"/>-->
-<!--        <input type="hidden" name="field" th:value="${field}"/>-->
-<!--        <input type="hidden" name="selectedOption" th:value="${selectedOption}"/>-->
-<!--        <input type="hidden" name="authors" th:if="${authors != null}" th:each="author : ${authors}" th:value="${author}"/>-->
-<!--        <input type="hidden" name="tags" th:if="${selectedTags != null}" th:each="tag : ${selectedTags}" th:value="${tag}"/>-->
-<!--        <input type="hidden" name="startDate" th:value="${startDate}"/>-->
-<!--        <input type="hidden" name="endDate" th:value="${endDate}"/>-->
-<!--&lt;!&ndash;        <input name="pageNumber" th:value="${pageNumber == null ? 1 : pageNumber + 1}" type="hidden"/>&ndash;&gt;-->
-<!--        <button type="submit">Next</button>-->
-<!--    </form>-->
-<!--</div>-->
 <div class="pagination">
     <!-- Previous Page Button -->
     <form th:action="@{/allposts}" method="GET">

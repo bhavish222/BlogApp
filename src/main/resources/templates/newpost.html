@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <title>New Post</title>
@@ -9,10 +10,12 @@
             margin: auto;
             margin-top: 50px;
         }
+
         label, input, textarea, h1 {
             width: 100%;
             margin: 10px;
         }
+
         h1 {
             text-align: center;
         }
@@ -21,7 +24,7 @@
 <body>
 
 <form method="POST" th:action="@{/savepost}" th:object="${Post}">
-    <h1>Create new BlogPost</h1>
+    <h1 >Create new BlogPost</h1>
 
     <input th:field="*{id}" type="hidden"/>
     <label for="title">Title</label><br>
@@ -36,5 +39,7 @@
 
     <input type="submit" value="Publish">
 </form>
+
+
 </body>
 </html>
