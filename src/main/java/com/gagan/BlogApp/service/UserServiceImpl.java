@@ -2,6 +2,7 @@ package com.gagan.BlogApp.service;
 
 import com.gagan.BlogApp.dao.TagRepository;
 import com.gagan.BlogApp.dao.UserRepository;
+import com.gagan.BlogApp.entity.Role;
 import com.gagan.BlogApp.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,7 +27,9 @@ public class UserServiceImpl implements UserService{
     }
     @Override
     public void saveUser(User user) {
-
+        Role role = new Role();
+        role.setRole("ROLE_Author");
+        user.setRole(role);
         userRepository.save(user);
     }
 

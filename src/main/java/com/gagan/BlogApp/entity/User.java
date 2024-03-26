@@ -20,6 +20,17 @@ public class User {
     @Column(name = "password")
     private String password;
 
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private Role role;
+
     public String getPassword() {
         return password;
     }
