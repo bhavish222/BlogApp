@@ -43,6 +43,7 @@ public class PostServiceImpl implements PostService {
             tagNamesInDb.add(tag.getName());
         }
         post.setTags(null);
+
         for(String tagName : tagInPost)
         {
             if (!tagNamesInDb.contains(tagName))
@@ -55,6 +56,7 @@ public class PostServiceImpl implements PostService {
                 post.addtag(newTag);
             }
         }
+
         String content = post.getContent();
         String excerpt = content.length() > 30 ? content.substring(0, 30) : content;
         post.setExcerpt(excerpt);
@@ -69,13 +71,13 @@ public class PostServiceImpl implements PostService {
             post.setCreatedAt(new Timestamp(System.currentTimeMillis()));
             post.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
 
-            //postRepository.save(post);
+            postRepository.save(post);
         } else {
-            // Post existingPost = postRepository.findById(post.getId());
-            post.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+            Post existingPost = postRepository.findById(post.getId());
+            existingPost.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+            postRepository.save(existingPost);
 
         }
-        postRepository.save(post);
 
     }
 
