@@ -31,6 +31,7 @@ public class UserServiceImpl implements UserService{
         role.setRole("ROLE_AUTHOR");
         user.setRole(role);
         userRepository.save(user);
+        role.setUser(user);
     }
 
     @Override
