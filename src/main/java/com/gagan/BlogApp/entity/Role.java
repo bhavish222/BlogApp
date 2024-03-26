@@ -39,7 +39,7 @@ public class Role {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @Column(name="role")
+    @Column(name="role_name")
     private String role;
 
     public Role() {};
