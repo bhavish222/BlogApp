@@ -28,7 +28,7 @@ public class UserServiceImpl implements UserService{
     @Override
     public void saveUser(User user) {
         Role role = new Role();
-        role.setRole("ROLE_Author");
+        role.setRole("ROLE_AUTHOR");
         user.setRole(role);
         userRepository.save(user);
     }
