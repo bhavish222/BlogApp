@@ -30,8 +30,8 @@ public class UserServiceImpl implements UserService{
         Role role = new Role();
         role.setRole("ROLE_AUTHOR");
         user.setRole(role);
-        userRepository.save(user);
         role.setUser(user);
+        userRepository.save(user);
     }
 
     @Override
