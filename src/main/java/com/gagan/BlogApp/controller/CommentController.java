@@ -48,6 +48,7 @@ public class CommentController {
         Comment comment = commentService.findById(theId);
         commentService.deleteById(theId);
         int postId = comment.getPost().getId();
+        int i = 1;
         return "redirect:/post/" + postId;
     }
 }
